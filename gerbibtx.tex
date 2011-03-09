@@ -1,0 +1,433 @@
+%macropackage=lplaing
+
+\documentstyle[bibgerm]{article}
+
+\def\tex{{\the\textfont0\TeX}}
+\def\pLaTeX{{\the\textfont0 L\kern-.36em\raise.3ex\hbox{\the\scriptfont0 
+A}\kern-.15em    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\def\LaTeX{\protect\pLaTeX}
+\def\pBibTeX{{\the\textfont0 B\hbox{\the\scriptfont0 IB}\kern-.1em\TeX}}
+\def\BibTeX{\protect\pBibTeX}
+\def\bibtex{\BibTeX}\def\tex{\TeX}
+\def\latex{\LaTeX}
+\def\dat#1{{\tt #1}}
+\def\bsl{{\tt\char'134}}   % '\'
+\def\leerz{{\tt\char'040}} % little 'u' for spaces
+\def\affe{\char'100}       % '@'
+\exhyphenpenalty=50 \hyphenpenalty=10 \doublehyphendemerits=50
+\finalhyphendemerits=50 \brokenpenalty=100 \pretolerance=0 \tolerance=2000
+\looseness=0 \linepenalty=10
+\hoffset=-1.0in \textwidth6.4in \oddsidemargin0.8in \evensidemargin0.8in
+\marginparwidth0.6in \marginparsep0.2in \marginparpush1ex
+\topmargin0pt \headheight2.5ex \headsep5ex \textheight9.25in
+\columnsep10pt \columnseprule0pt
+\parindent0pt \parskip2.5ex plus1.5ex minus1.5ex
+\renewcommand{\arraystretch}{1.2}
+\renewcommand{\baselinestretch}{1.1}
+\def\footnoterule{\vfill\kern-3pt \hrule width \textwidth\kern 2.6pt}
+\pagestyle{headings}
+\newlength{\mylena}
+\originalTeX\nonfrenchspacing
+
+\begin{document}
+
+\title{German and international \bibtex ing\\A manual for the 'german' \bibtex\ styles}
+\author{Martin Wallmeier\thanks{Tel.: 
+[[0]0\,49]\,(09\,31)\,80\,05\,--\,5\,10}\\ G"obelslehenstr. 1--b\,16\\8700 
+W"urzburg\\ West Germany\\e-mail: neuk121@wrzx13.rz.uni-wuerzburg.de}
+\date{20$^{th}$ April 1993}
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+
+The original \bibtex\ version 0.99b standard styles allow only English 
+references. There are some so called \dat{'German'} styles, but they allow 
+only German references. I couldn't find any style beeing able to switch 
+between the language for mixed references. In scientific publications you 
+will find a lot of English references beside the ones of the country, where 
+the publication was written. But it looks awful, if you mix an english 
+reference with german expressions, for example:
+\begin{center}\begin{minipage}{.7\textwidth}\raggedright\tt Wilson, 
+Braunwald, und Isselbacher, Herausgeber. Harrison's Principles of Internal 
+Medicine. Band 1, twelfth Auf{}lage\ldots\end{minipage}\end{center}
+So I tried to write a style being able to switch the language.
+
+\section[Restrictions of and problems with \bibtex]{Restrictions of and 
+problems with \bibtex\footnote{Dedicated to Oren Patashnik at Stanford 
+University. I hope this will find him anytime.}}
+
+There is a terrific restriction at least in my version of \bibtex: it 
+allows only ten (10) global variables of type \dat{STRINGS}. Therefore it 
+was impossible to implement a function which would decide whether to switch 
+the language and then call a specific function for every country that could 
+actualize the contents of these string variables. So the only possible way 
+seemed to be to create a series of \tex\ macros.
+
+Another problem occured with \bibtex's built in function 
+\verb|add.period$|. This function adds a point, if the last non '\}' 
+character is no '.', '!' or '?'. But how to tell \verb|add.period$| that 
+the \tex\ macros for abbreviations contain a point, although there is not 
+one obvious for \bibtex? The \tex\ macros have one parameter now: If you 
+abbreviate editors for example as 'eds.' \verb|add.period$| mustn't set a 
+point if the corresponding \tex\ macro is set in the output. So {\tt\bsl 
+btxeditorsshort} is defined as follows:\\[.5ex]
+\verb|      \def\btxeditorsshort#1{eds#1}|\\[.5ex]
+Now you can write {\tt\bsl btxeditorsshort\{.\}} in the \bibtex\ style file 
+and \verb|add.period$| will find a point if {\tt\bsl btxeditorsshort\{.\}} 
+is the last expression in the sentence. As you can see this is only 
+necessary for those expressions that can stand at the end of a sentence or 
+block. 'And' usually will not stay at the end of a sentence. So you can 
+define the corresponding macros as pointed abbreviation, if you want to.
+
+I had to face a last problem with the built in function 
+\verb|change.case$|. It's similar to the one with \verb|add.period$|.  This 
+function is also unable to expand the defined \tex\ macros. Therefore I had 
+to define always two forms of macros \verb|\btx...| and \verb|\Btx...| 
+where the second should be used where something like `The Quick Brown Fox 
+Jumps Over The Lazy Dog' is to occure and the first for something like `The 
+quick brown fox\ldots' if the expression starts a sentence or `the quick 
+brown fox\ldots' if it is used in the middle of a sentence. The {\tt 
+change.case\$} function will not be called if a title is going to be 
+formatted and {\tt language} is not set to {\tt 'english'} or {\tt 
+'USenglish'}. Henceforth you don't have to use '\{\}' braces to avoid {\tt 
+chang.case\$} in titles of other languages. Thus typing is much easier. 
+Typing comfort could be also improoved very much if \bibtex\ would 
+understand umlauts as \tex\ version 3.1 and not only constructions like 
+\verb|{\"{a}}|.
+
+All these constructions are tricky and uncomfortable only to bypass or fool 
+the built in \bibtex\ functions. Things would be much easier if more global 
+string variables could be defined. Then \bibtex\ could format the content 
+of the string variables directly and commands like \verb|add.period$| or 
+\verb|\cange.case$| would work the same way as if the expression would 
+occure in the text.
+
+Now you know about the reasons why I had to make a new \latex\ style 
+\dat{bibgerm.sty} for use with the \dat{ger[...].bst} \bibtex\ styles. It 
+defines the \tex\ macros mentioned above and listed below.
+
+\section{Implementation}
+
+\bibtex\ was changed in the way that it doesn't place string constants, but 
+\tex\ macros into the output for expressions that vary in the different 
+languages. So \bibtex\ generates a {\tt\bsl selectlanguage\{...\}} command 
+just before the current \verb|\bibitem[...]{...}| if the {\tt language} 
+field in the database entry is not empty. There are only a few allowed 
+contents for {\tt language}: {\tt 'german'}, {\tt 'austrian'}, {\tt 
+'english'}, and  {\tt 'USenglish'}, because I'm speaking only German and 
+bad English. {\tt 'english'} does the same as {\tt 'USenglish'} at the 
+moment. I think there won't be many differences, but I could imagine some 
+concerning 'Master's thesis' and 'PhD thesis'. {\tt 'austrian'} does nearly 
+the same as {\tt 'german'}, only the month 'January' is different.
+
+It should be not so very difficult to implement other languages for someone 
+who is a little bit acquainted to \tex\ or \latex. You probably needn't 
+change the \bibtex\ styles, but only to supplement the \dat{bibgerm.sty} 
+\latex\ style a little bit.
+
+\subsection{\ifx\undefined\selectfont \else\series{m}\fi\dat{bibgerm.sty}}
+
+The macro \verb|\selectlanguage{...}| of the original \dat{german.sty} 
+\cite{partl}switched already things like {\tt 'date'} and {\tt 
+'captionnames'}. There are now some new global definitions 
+\verb|\bibsgerman|, \verb|\bibsenglish| and \verb|\bibsUSenglish| being 
+called by {\tt\bsl selectlanguage\{...\}}. The \verb|\bibs...| macros 
+redefine the meanings for a list of \tex\ macros according to the current 
+language:
+\settowidth{\mylena}{\tt\bsl def\bsl ...short\#\#1\{...\#\#1\}}
+\begin{center}\begin{tabular}{|l|p{.67\textwidth}@{}l|}\hline
+\multicolumn{3}{|c|}{General Aspects}\\\hline
+\hbox to\mylena{\tex\ macro\hfil} & Meaning &\\\hline
+{\tt\bsl def\bsl btx...\{...\}} & \raggedright Expression in lower case 
+letters for use in the middle of a sentence (e.\ g.\ 'volume').&\\
+{\tt\bsl def\bsl Btx...\{...\}} & \raggedright Expression with the first 
+letter capitalized for use at the beginning of a sentence (e.\ g.\ 
+'Volume') or formatted like a booktitle (e.\ g.\ 'Technical Report 
+037').&\\
+{\tt\bsl def\bsl ...short\#\#1\{...\#\#1\}} & \raggedright Mostly 
+abbreviated expression. The tricky construction {\tt\#\#1} was explained 
+above. You need double {\tt'\#'} because the macros are defined inside the 
+global definition of the {\tt\bsl bibs...} macro. The parameter {\tt\#\#1} 
+is used to set the last point of an abbreviation that can occure at the end 
+of a sentence (e.\ g.\ {\tt\bsl def\bsl btxetalshort\#\#1\{et~al\#\#1\}}). 
+If you don't want to have a point at the end you skip the {\tt\#\#1} inside 
+the braces.&\\
+{\tt\bsl def\bsl ...long\{...\}} & \raggedright Expression used for the 
+long i.\,\,e.\ unabbreviated form (e.\ g.\ {\tt\bsl def\bsl btxetallong\{ 
+et~alii\}}). &\\\hline
+\multicolumn{3}{|c|}{Details}\\\hline
+\hbox to\mylena{\tex\ macro\hfil} & meaning &\\\hline
+{\tt\bsl def\bsl btxetalshort\#\#1} & \raggedright Used after authors or 
+editors, if there is {\tt 'and othrers'} at the end of the corresponding 
+\bibtex\ database entry field (defined as {\tt 'et~al\#\#1{}'}). This 
+expression might finish a sentence or block; so {\tt '\#\#1'} is necessary 
+for {\tt 'add.period\$'}. &\\
+{\tt\bsl def\bsl btxetallong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'et~alii'}). &\\
+{\tt\bsl def\bsl btxandshort} & \raggedright Used before the last author or 
+editor if there are more than one (defined as {\tt 'and'}). &\\
+{\tt\bsl def\bsl btxandlong} & \raggedright Unabbreviated form of the above 
+(defined as {\tt 'and'}). &\\
+{\tt\bsl def\bsl btxinshort} & \raggedright Used with entry type {\tt 
+@incollection} or {\tt @inproceedings} as introduction for the reference to 
+the superior work (defined as {\tt 'in'}). &\\
+{\tt\bsl def\bsl btxinlong} & \raggedright Unabbreviated form of the above 
+(defined as {\tt 'in'}). &\\
+{\tt\bsl def\bsl Btxinshort} & \raggedright For use at the beginning of a 
+sentence (defined as {\tt 'In'}). &\\
+{\tt\bsl def\bsl Btxinlong} & \raggedright Unabbreviated form of the above 
+(defined as {\tt 'In'}). &\\
+{\tt\bsl def\bsl btxofseriesshort} & \raggedright Used after the volume 
+number before the title of the book series (defined as {\tt 'of'}). &\\
+{\tt\bsl def\bsl btxofserieslong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'of'}). &\\
+{\tt\bsl def\bsl btxinseriesshort} & \raggedright Used for a part of a book 
+with a separate title. If there is a number given it is placed before the 
+title of the series (defined as {\tt 'in'}). &\\
+{\tt\bsl def\bsl btxinserieslong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'in'}). &\\
+\hline\end{tabular}
+
+\begin{tabular}{|l|p{.67\textwidth}@{}l|}\hline
+\hbox to\mylena{\tex\ macro\hfil} & meaning &\\\hline
+{\tt\bsl def\bsl btxeditorshort\#\#1} & \raggedright Abbreviation for a 
+single {\em editor\/} that can be placed at the end of the editor block 
+(defined as {\tt 'ed\#\#1{}'}). &\\
+{\tt\bsl def\bsl btxeditorlong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'editor'}). &\\
+{\tt\bsl def\bsl btxeditorsshort\#\#1} & \raggedright Equivalent of the 
+above for more than one editor (defined as {\tt 'eds\#\#1{}'}). &\\
+{\tt\bsl def\bsl btxeditorslong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'editors'}). &\\
+{\tt\bsl def\bsl Btxeditorshort\#\#1} & \raggedright This and the following 
+macros could be used by a style file that would start a bibliography entry 
+with something like 'Ed.:\ \ldots' (defined as {\tt 'Ed\#\#1{}'}). &\\
+{\tt\bsl def\bsl Btxeditorlong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'Editor'}). &\\
+{\tt\bsl def\bsl Btxeditorsshort\#\#1} & \raggedright Plural of the above 
+(defined as {\tt 'Eds\#\#1{}'}). &\\
+{\tt\bsl def\bsl Btxeditorslong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'Editors'}). &\\
+{\tt\bsl def\bsl btxvolumeshort\#\#1} & \raggedright Abbreviation for {\em 
+volume\/} for use after a comma, i.\,\,e.\ in the middle of a sentence 
+(defined as {\tt 'vol\#\#1{}'}). &\\
+{\tt\bsl def\bsl btxvolumelong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'volume'}). &\\
+{\tt\bsl def\bsl Btxvolumeshort\#\#1} & \raggedright For use at the 
+beginning of a sentence (defined as {\tt 'Vol\#\#1{}'}). &\\
+{\tt\bsl def\bsl Btxvolumelong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'Volume'}). &\\
+{\tt\bsl def\bsl btxnumbershort\#\#1} & \raggedright Abbreviation for {\em 
+number\/} if used in the middle of a sentence (defined as {\tt 
+'no\#\#1{}'}). &\\
+{\tt\bsl def\bsl btxnumberlong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'number'}). &\\
+{\tt\bsl def\bsl Btxnumbershort\#\#1} & \raggedright For use at the 
+beginning of a sentence (defined as {\tt 'No\#\#1{}'}). &\\
+{\tt\bsl def\bsl Btxnumberlong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'Number'}). &\\
+{\tt\bsl def\bsl btxeditionshort\#\#1} & \raggedright Abbreviation for {\em 
+edition\/} that can finish a sentence or block (defined as {\tt 
+'ed\#\#1{}'}). &\\
+{\tt\bsl def\bsl btxeditionlong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'edition'}). &\\
+{\tt\bsl def\bsl Btxeditionshort\#\#1} & \raggedright For use at the 
+beginning of a sentence (defined as {\tt 'Ed\#\#1{}'}). &\\
+{\tt\bsl def\bsl Btxeditionlong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'Edition'}). &\\
+{\tt\bsl def\bsl btxchaptershort\#\#1} & \raggedright Abbreviation for {\em 
+chapter\/} which might be placed at the end of a sentence if it would be 
+used after first, second, etc. (defined as {\tt 'chap\#\#1{}'}). &\\
+{\tt\bsl def\bsl btxchapterlong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'chapter'}). &\\
+{\tt\bsl def\bsl Btxchaptershort\#\#1} & \raggedright For use at the 
+beginning of a sentence (defined as {\tt 'Chap\#\#1{}'}). &\\
+{\tt\bsl def\bsl Btxchapterlong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'Chapter'}). &\\
+{\tt\bsl def\bsl btxpageshort\#\#1} & Abbreviation for {\em page\/} 
+\raggedright (defined as {\tt 'p\#\#1{}'}). &\\
+{\tt\bsl def\bsl btxpagelong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'page'}). &\\
+{\tt\bsl def\bsl btxpagesshort\#\#1} & \raggedright If there are more than 
+one {\em page\/} this abbreviation will be used (defined as {\tt 
+'pp\#\#1{}'}). &\\
+{\tt\bsl def\bsl btxpageslong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'pages'}). &\\
+{\tt\bsl def\bsl Btxpageshort\#\#1} & \raggedright For use at the beginning 
+of a sentence (defined as {\tt 'P\#\#1{}'}). &\\
+{\tt\bsl def\bsl Btxpagelong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'Page'}). &\\
+{\tt\bsl def\bsl Btxpagesshort\#\#1} & \raggedright Plural of the above 
+(defined as {\tt 'Pp\#\#1{}'}). &\\
+{\tt\bsl def\bsl Btxpageslong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'Pages'}). &\\
+\hline\end{tabular}
+
+\begin{tabular}{|l|p{.67\textwidth}@{}l|}\hline
+\hbox to\mylena{\tex\ macro\hfil} & Meaning &\\\hline
+{\tt\bsl def\bsl btxmastthesis} & \raggedright Expression that will be used 
+by default if there is given no \bibtex\ database entry field {\tt type} in 
+a {\tt @masterthesis} entry (defined as {\tt 'Master's thesis'}). &\\
+{\tt\bsl def\bsl btxphdthesis} & \raggedright Equivalent of the above for 
+the {\tt @phdthesis} entry (defined as {\tt 'PhD thesis'}). &\\
+{\tt\bsl def\bsl btxtechrepshort\#\#1} & \raggedright Equivalent of the 
+above for abbreviated {\tt @techreport} entry formatted like the title of 
+an article or journal, i.\,\,e.\ only the first letter capitalized (defined 
+as {\tt 'Techn.\ rep\#\#1{}'}). &\\
+{\tt\bsl def\bsl btxtechreplong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'Technical report'}). &\\
+{\tt\bsl def\bsl Btxtechrepshort\#\#1} & \raggedright Same as the above but 
+formatted like a booktitle, i.\,\,e.\ all words capitalized except articles 
+and conjunctions like 'the' or 'of', etc. This one is used if the number 
+field of the {\tt @techreport} entry is not empty (defined as {\tt 'Techn.\ 
+Rep\#\#1{}'}). &\\
+{\tt\bsl def\bsl Btxtechreplong} & \raggedright Unabbreviated form of the 
+above (defined as {\tt 'Technical Report'}). &\\
+{\tt\bsl def\bsl btxmonjanshort\#\#1} & \raggedright Abbreviated names of 
+the months (defined as {\tt 'Jan\#\#1{}'}). &\\
+{\tt\bsl def\bsl btxmonfebshort\#\#1} & \raggedright (defined as {\tt 
+'Feb\#\#1{}'}). &\\
+{\tt\bsl def\bsl btxmonmarshort\#\#1} & \raggedright (defined as {\tt 
+'Mar\#\#1{}'}). &\\
+{\tt\bsl def\bsl btxmonaprshort\#\#1} & \raggedright (defined as {\tt 
+'Apr\#\#1{}'}). &\\
+{\tt\bsl def\bsl btxmonmayshort\#\#1} & \raggedright (defined as {\tt 
+'May'}). &\\
+{\tt\bsl def\bsl btxmonjunshort\#\#1} & \raggedright (defined as {\tt 
+'June'}). &\\
+{\tt\bsl def\bsl btxmonjulshort\#\#1} & \raggedright (defined as {\tt 
+'July'}). &\\
+{\tt\bsl def\bsl btxmonaugshort\#\#1} & \raggedright (defined as {\tt 
+'Aug\#\#1{}'}). &\\
+{\tt\bsl def\bsl btxmonsepshort\#\#1} & \raggedright (defined as {\tt 
+'Sept\#\#1{}'}). &\\
+{\tt\bsl def\bsl btxmonoctshort\#\#1} & \raggedright (defined as {\tt 
+'Oct\#\#1{}'}). &\\
+{\tt\bsl def\bsl btxmonnovshort\#\#1} & \raggedright (defined as {\tt 
+'Nov\#\#1{}'}). &\\
+{\tt\bsl def\bsl btxmondecshort\#\#1} & \raggedright (defined as {\tt 
+'Dec\#\#1{}'}). &\\
+{\tt\bsl def\bsl btxmonjanlong} & \raggedright Unabbreviated names of the 
+months (defined as {\tt 'January'}). &\\
+{\tt\bsl def\bsl btxmonfeblong} & \raggedright (defined as {\tt 
+'February'}). &\\
+{\tt\bsl def\bsl btxmonmarlong} & \raggedright (defined as {\tt 'March'}). 
+&\\
+{\tt\bsl def\bsl btxmonaprlong} & \raggedright (defined as {\tt 'April'}). 
+&\\
+{\tt\bsl def\bsl btxmonmaylong} & \raggedright (defined as {\tt 'May'}). 
+&\\
+{\tt\bsl def\bsl btxmonjunlong} & \raggedright (defined as {\tt 'June'}). 
+&\\
+{\tt\bsl def\bsl btxmonjullong} & \raggedright (defined as {\tt 'July'}). 
+&\\
+{\tt\bsl def\bsl btxmonauglong} & \raggedright (defined as {\tt 'August'}). 
+&\\
+{\tt\bsl def\bsl btxmonseplong} & \raggedright (defined as {\tt 
+'September'}). &\\
+{\tt\bsl def\bsl btxmonoctlong} & \raggedright (defined as {\tt 
+'October'}). &\\
+{\tt\bsl def\bsl btxmonnovlong} & \raggedright (defined as {\tt 
+'November'}). &\\
+{\tt\bsl def\bsl btxmondeclong} & \raggedright (defined as {\tt 
+'December'}). &\\
+\hline\end{tabular}\end{center}
+
+For more details about macro programming refer to \cite{texbook}.
+
+\subsection{Available \bibtex\ styles and file list}
+
+All \bibtex\ standard styles are available although I've changed their 
+design a little bit. Furthermore, I adjusted the \dat{'apalike.bst'} which 
+allows references like '(Jones 1986)'. The names of the 'german' \bibtex\ 
+styles, their corresponding standards, and the remaining files are listed 
+in the following table:
+\begin{center}\begin{tabular}{|l|l|}\hline
+\multicolumn{2}{|c|}{\bibtex\ Styles and Files}\\\hline
+'german' & Standard \\\hline
+{\tt gerabbrv.bst} & {\tt abbrv.bst} \\
+{\tt geralpha.bst} & {\tt alpha.bst} \\
+{\tt gerplain.bst} & {\tt plain.bst} \\
+{\tt gerunsrt.bst} & {\tt unsrt.bst} \\\hline
+{\tt gerapali.bst} & {\tt apalike.bst} \\\hline
+{\tt gerxampl.bib} & {\tt xampl.bib} \\\hline\hline
+\multicolumn{2}{|c|}{\latex\ Styles}\\\hline
+'german' & Standard \\\hline
+{\tt bibgerm.sty} & {\tt german.sty} \\
+{\tt apalike.sty} & {\tt apalike.sty} \\\hline\hline
+\multicolumn{2}{|c|}{Manual for \latex}\\\hline
+{\tt gerbibtx.tex} & {\sc Manual} and \\
+{\tt gerbibtx.bib} & {\sc Bibliography}\\\hline\hline
+\multicolumn{2}{|c|}{Original Manuals}\\\hline
+{\tt btxdoc.tex} & For general users\\
+{\tt btxhak.tex} & For style designers\\
+{\tt btxdoc.bib} & {\sc Bibliography}\\\hline
+\end{tabular}\end{center}
+
+If you want to write \bibtex\ styles on your own, you are absolutely in 
+need of \cite{bibtex.a} and \cite{bibtex.b}. These documents should be as 
+files in your distribution of \bibtex. If they are not, complain violently 
+to the distributor.
+
+\subsection{Changes to the standard styles}
+
+There are two new functions: {\tt after.authors} and {\tt smallcaps}. The 
+last is similar to {\tt emphasize}. It sets the authors or editors in {\sc 
+Small Caps}. If you don't like that, you can change it to an empty 
+function. The other one sets the new 'state' {\tt before.title}. These 
+'states' are used by the different {\tt output} routines to decide what 
+punctuation is going to be placed (most times point or comma) before the 
+string on the stack. If the current 'state' is {\tt before.title} a colon 
+is placed before the title of what ever, i.\,\,e. regularly after authors 
+and editors. If you don't like this either, you can copy the function {\tt 
+new.block} to {\tt after.authors}. Then a point will be set instead of a 
+colon. {\tt gerapali.bst} behaves in this way, because a colon after braces 
+looks a little bit strange.
+
+I've changed also the format of the authors' and editors' names to my 
+personal favorites:
+
+\begin{center}\begin{minipage}{.7\textwidth}\raggedright\tt Wallmeier, M. 
+van, O. Patashnik, and L. van Lamport (eds.): \bibtex ing is 
+great\ldots\end{minipage}\end{center}
+
+You can reset the original status by comparing the lines where the function 
+{\tt format.name\$} occures with the according lines in the original 
+standard \bibtex\ styles. Nevertheless you should be familar with \bibtex's 
+name formatting \cite[section 5.4]{bibtex.b}.
+
+I'm not in access to the original \latex\ standard work \cite{lamport}. But 
+\cite[appendix B]{kopka} is marked as an almost extensive translation from 
+\cite{lamport}. If this is true, there are a few differences concerning the 
+optional fields in some entry types. They concern the additional field {\tt 
+number} that is used by the entry types {\tt @book}, {\tt @inbook}, {\tt 
+@incollection}, {\tt @inproceedings}, and {\tt @proceedings} and the 
+additional field {\tt tpye} that is used in {\tt @masterthesis} and {\tt 
+@phdthesis}.
+
+Those were of most importance for writing {\tt bibgerm.sty} and the {\tt 
+ger[...].bst} files, but there are some more \cite[section 2.2 'Changes to 
+the standard styles']{bibtex.a}.
+
+
+\section{Changes}
+
+\begin{description}
+\item[1993, April 20th:] \verb|bibgerm.sty| changed for use with `german.sty' 
+version 2.4. In detail: redefine `\verb|\selectlanguage|' or 
+`\verb|\p@selectlanguage|' depending on version of `german.sty'. 
+\end{description}
+
+\section{Known bugs}
+
+\begin{description}
+\item[german.sty:] Probably `\verb|bibgerm.sty|' won't work with `german.sty' 
+version 3.
+\end{description}
+
+\bibliography{gerbibtx}\bibliographystyle{gerplain}
+
+\end{document}
+
